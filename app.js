@@ -4,6 +4,25 @@ const HIGHLIGHT_COLOR = "#d9743a";
 
 const DATE_RE = /(\d{1,2})\/(\d{1,2})\/(\d{4})\s*$/;
 
+const ANCHOR_ICON_SVG = `
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="12" cy="5" r="2.4" fill="#d9743a" stroke="#fff" stroke-width="1.2"/>
+  <line x1="12" y1="7.4" x2="12" y2="20" stroke="#d9743a" stroke-width="2.2" stroke-linecap="round"/>
+  <line x1="12" y1="20" x2="12" y2="20" stroke="#fff" stroke-width="0"/>
+  <path d="M6 14c0 4 2.7 6.5 6 6.5s6-2.5 6-6.5" stroke="#d9743a" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+  <path d="M6 14c0 4 2.7 6.5 6 6.5s6-2.5 6-6.5" stroke="#fff" stroke-width="0.6" stroke-linecap="round" fill="none"/>
+  <line x1="7.5" y1="11.5" x2="16.5" y2="11.5" stroke="#d9743a" stroke-width="2.2" stroke-linecap="round"/>
+</svg>`.trim();
+
+const VAN_ICON_SVG = `
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M2 14.5V9.5C2 8.7 2.7 8 3.5 8H13l5 3.5V14.5H2Z" fill="#2f9e6e" stroke="#fff" stroke-width="1"/>
+  <rect x="2" y="8" width="16" height="6.5" fill="#2f9e6e" stroke="#fff" stroke-width="1"/>
+  <rect x="13.2" y="9.7" width="4.3" height="3.2" fill="#cdeee0" stroke="#2f9e6e" stroke-width="0.6"/>
+  <circle cx="6.5" cy="15.5" r="1.9" fill="#1f2f2a" stroke="#fff" stroke-width="0.8"/>
+  <circle cx="15.5" cy="15.5" r="1.9" fill="#1f2f2a" stroke="#fff" stroke-width="0.8"/>
+</svg>`.trim();
+
 function setupPanelToggle() {
   const panel = document.getElementById("panel");
   const toggle = document.getElementById("panel-toggle");
@@ -173,9 +192,9 @@ function buildMap({ stopovers, logs }) {
     const marker = L.marker([point.lat, point.lon], {
       icon: L.divIcon({
         className: "",
-        html: '<div class="stopover-dot"></div>',
-        iconSize: [10, 10],
-        iconAnchor: [5, 5],
+        html: `<div class="stopover-icon">${ANCHOR_ICON_SVG}</div>`,
+        iconSize: [20, 20],
+        iconAnchor: [10, 10],
       }),
     }).addTo(map);
     point.marker = marker;
@@ -186,7 +205,7 @@ function buildMap({ stopovers, logs }) {
     const marker = L.marker([currentLocation.lat, currentLocation.lon], {
       icon: L.divIcon({
         className: "",
-        html: '<div class="current-location-marker"><div class="pulse-ring"></div><div class="pulse-dot"></div></div>',
+        html: `<div class="current-location-marker"><div class="pulse-ring"></div><div class="pulse-icon">${VAN_ICON_SVG}</div></div>`,
         iconSize: [22, 22],
         iconAnchor: [11, 11],
       }),
