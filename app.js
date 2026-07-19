@@ -27,6 +27,47 @@ function fitBoundsPadding() {
   return { padding: [20, 20] };
 }
 
+// Pads latLngBounds on its shorter axis so its aspect ratio matches the map
+// viewport's usable (post-padding) area, avoiding the large empty margins
+// fitBounds otherwise leaves when the data's bounding box shape doesn't
+// match the window shape.
+function aspectAdjustedBounds(map, latLngBounds, padding) {
+  const crs = map.options.crs;
+  const sw = crs.project(latLngBounds.getSouthWest());
+  const ne = crs.project(latLngBounds.getNorthEast());
+  const dataWidth = Math.abs(ne.x - sw.x);
+  const dataHeight = Math.abs(sw.y - ne.y);
+  if (!dataWidth || !dataHeight) return latLngBounds;
+
+  const size = map.getSize();
+  if (!size.x || !size.y) return latLngBounds;
+  const [padLeft, padTop] = padding.paddingTopLeft || padding.padding || [0, 0];
+  const [padRight, padBottom] = padding.paddingBottomRight || padding.padding || [0, 0];
+  const usableWidth = size.x - padLeft - padRight;
+  const usableHeight = size.y - padTop - padBottom;
+  if (usableWidth <= 0 || usableHeight <= 0) return latLngBounds;
+  const containerAspect = usableWidth / usableHeight;
+  const dataAspect = dataWidth / dataHeight;
+
+  let padX = 0;
+  let padY = 0;
+  if (dataAspect < containerAspect) {
+    padX = (dataHeight * containerAspect - dataWidth) / 2;
+  } else {
+    padY = (dataWidth / containerAspect - dataHeight) / 2;
+  }
+
+  const minX = Math.min(sw.x, ne.x) - padX;
+  const maxX = Math.max(sw.x, ne.x) + padX;
+  const minY = Math.min(sw.y, ne.y) - padY;
+  const maxY = Math.max(sw.y, ne.y) + padY;
+
+  return L.latLngBounds(
+    crs.unproject(L.point(minX, maxY)),
+    crs.unproject(L.point(maxX, minY))
+  );
+}
+
 function parseWaypointDate(name) {
   const match = DATE_RE.exec(name || "");
   if (!match) return null;
@@ -103,7 +144,7 @@ function bindMarkerInteractions(marker, point, isCurrent, hoverCapable) {
 }
 
 function buildMap({ stopovers, logs }) {
-  const map = L.map("map", { zoomControl: true });
+  const map = L.map("map", { zoomControl: true, zoomSnap: 0.25 });
 
   L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
     attribution:
@@ -159,7 +200,9 @@ function buildMap({ stopovers, logs }) {
     .concat(stopovers.map((s) => [s.lat, s.lon]));
 
   if (allPoints.length) {
-    map.fitBounds(L.latLngBounds(allPoints), fitBoundsPadding());
+    const padding = fitBoundsPadding();
+    const bounds = aspectAdjustedBounds(map, L.latLngBounds(allPoints), padding);
+    map.fitBounds(bounds, padding);
   } else {
     map.setView([48, 10], 4);
   }
@@ -216,7 +259,10 @@ function selectLog(entry, map) {
   if (entry.listItem) entry.listItem.classList.add("active");
   selected = { kind: "log", entry };
   if (entry.coords.length) {
-    map.fitBounds(L.latLngBounds(entry.coords), fitBoundsPadding());
+    map.fitBounds(L.latLngBounds(entry.coords), {
+      ...fitBoundsPadding(),
+      maxZoom: map.getZoom(),
+    });
   }
 }
 
@@ -226,7 +272,7 @@ function selectCamp(entry, map) {
   if (el) el.classList.add("panel-selected");
   if (entry.listItem) entry.listItem.classList.add("active");
   selected = { kind: "camp", entry };
-  map.setView([entry.lat, entry.lon], Math.max(map.getZoom(), 12));
+  map.panTo([entry.lat, entry.lon]);
   entry.marker.openPopup();
 }
 
