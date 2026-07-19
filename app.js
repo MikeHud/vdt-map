@@ -18,6 +18,15 @@ function setupPanelToggle() {
   toggle.addEventListener("click", () => setOpen(!panel.classList.contains("open")));
 }
 
+function fitBoundsPadding() {
+  const panel = document.getElementById("panel");
+  if (panel && panel.classList.contains("open")) {
+    const panelWidth = panel.getBoundingClientRect().width;
+    return { paddingTopLeft: [20, 20], paddingBottomRight: [20 + panelWidth, 20] };
+  }
+  return { padding: [20, 20] };
+}
+
 function parseWaypointDate(name) {
   const match = DATE_RE.exec(name || "");
   if (!match) return null;
@@ -150,7 +159,7 @@ function buildMap({ stopovers, logs }) {
     .concat(stopovers.map((s) => [s.lat, s.lon]));
 
   if (allPoints.length) {
-    map.fitBounds(L.latLngBounds(allPoints), { padding: [20, 20] });
+    map.fitBounds(L.latLngBounds(allPoints), fitBoundsPadding());
   } else {
     map.setView([48, 10], 4);
   }
@@ -176,7 +185,7 @@ function renderList(listEl, entries, onSelect, currentEntry) {
       tag.textContent = "CURRENT";
       li.appendChild(tag);
     }
-    li.addEventListener("click", () => onSelect(entry, li));
+    li.addEventListener("click", () => onSelect(entry));
     entry.listItem = li;
     listEl.appendChild(li);
   });
@@ -207,7 +216,7 @@ function selectLog(entry, map) {
   if (entry.listItem) entry.listItem.classList.add("active");
   selected = { kind: "log", entry };
   if (entry.coords.length) {
-    map.fitBounds(L.latLngBounds(entry.coords), { padding: [20, 20] });
+    map.fitBounds(L.latLngBounds(entry.coords), fitBoundsPadding());
   }
 }
 
