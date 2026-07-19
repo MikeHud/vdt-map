@@ -39,14 +39,17 @@ function parseGpx(xml) {
     };
   });
 
-  const trkSegs = Array.from(xml.querySelectorAll("trk > trkseg")).map((seg) =>
-    Array.from(seg.querySelectorAll("trkpt")).map((pt) => [
+  const trkNodes = Array.from(xml.querySelectorAll("trk"));
+  const logs = trkNodes.map((node) => {
+    const name = text(node, "name");
+    const coords = Array.from(node.querySelectorAll("trkpt")).map((pt) => [
       parseFloat(pt.getAttribute("lat")),
       parseFloat(pt.getAttribute("lon")),
-    ])
-  );
+    ]);
+    return { name, date: parseWaypointDate(name), coords };
+  });
 
-  return { stopovers, trkSegs };
+  return { stopovers, logs };
 }
 
 function popupHtml(point, isCurrent) {
@@ -75,7 +78,7 @@ function bindMarkerInteractions(marker, point, isCurrent, hoverCapable) {
   }
 }
 
-function buildMap({ stopovers, trkSegs }) {
+function buildMap({ stopovers, logs }) {
   const map = L.map("map", { zoomControl: true });
 
   L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
@@ -85,9 +88,9 @@ function buildMap({ stopovers, trkSegs }) {
     maxZoom: 19,
   }).addTo(map);
 
-  trkSegs.forEach((seg) => {
-    if (seg.length > 1) {
-      L.polyline(seg, { color: ROUTE_COLOR, weight: 3, opacity: 0.75 }).addTo(map);
+  logs.forEach((log) => {
+    if (log.coords.length > 1) {
+      log.layer = L.polyline(log.coords, { color: ROUTE_COLOR, weight: 3, opacity: 0.75 }).addTo(map);
     }
   });
 
@@ -109,6 +112,7 @@ function buildMap({ stopovers, trkSegs }) {
         iconAnchor: [5, 5],
       }),
     }).addTo(map);
+    point.marker = marker;
     bindMarkerInteractions(marker, point, false, hoverCapable);
   });
 
@@ -122,11 +126,12 @@ function buildMap({ stopovers, trkSegs }) {
       }),
       zIndexOffset: 1000,
     }).addTo(map);
+    currentLocation.marker = marker;
     bindMarkerInteractions(marker, currentLocation, true, hoverCapable);
   }
 
-  const allPoints = trkSegs
-    .flat()
+  const allPoints = logs
+    .flatMap((log) => log.coords)
     .concat(stopovers.map((s) => [s.lat, s.lon]));
 
   if (allPoints.length) {
@@ -134,6 +139,8 @@ function buildMap({ stopovers, trkSegs }) {
   } else {
     map.setView([48, 10], 4);
   }
+
+  return { map, stopovers, logs, currentLocation };
 }
 
 fetch(GPX_FILE)
