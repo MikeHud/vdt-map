@@ -5,17 +5,23 @@ const HIGHLIGHT_COLOR = "#d9743a";
 const DATE_RE = /(\d{1,2})\/(\d{1,2})\/(\d{4})\s*$/;
 
 const ANCHOR_ICON_SVG = `
-<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="12" cy="5" r="2.4" fill="#d9743a" stroke="#fff" stroke-width="1.2"/>
-  <line x1="12" y1="7.4" x2="12" y2="20" stroke="#d9743a" stroke-width="2.2" stroke-linecap="round"/>
-  <line x1="12" y1="20" x2="12" y2="20" stroke="#fff" stroke-width="0"/>
-  <path d="M6 14c0 4 2.7 6.5 6 6.5s6-2.5 6-6.5" stroke="#d9743a" stroke-width="2.2" stroke-linecap="round" fill="none"/>
-  <path d="M6 14c0 4 2.7 6.5 6 6.5s6-2.5 6-6.5" stroke="#fff" stroke-width="0.6" stroke-linecap="round" fill="none"/>
-  <line x1="7.5" y1="11.5" x2="16.5" y2="11.5" stroke="#d9743a" stroke-width="2.2" stroke-linecap="round"/>
+<svg width="20" height="20" viewBox="0 0 426.667 426.667" xmlns="http://www.w3.org/2000/svg">
+  <g>
+    <path fill="#d9743a" d="M213.333,426.667c-88.508,0-160.516-72.009-160.516-160.516h46.652
+      c0,62.788,51.085,113.869,113.869,113.869c62.793,0,113.873-51.081,113.873-113.869h46.643
+      C373.85,354.658,301.841,426.667,213.333,426.667z"/>
+    <rect x="189.995" y="105.634" fill="#d9743a" width="46.652" height="297.707"/>
+    <rect x="144.742" y="147.115" fill="#d9743a" width="137.173" height="46.643"/>
+    <path fill="#d9743a" d="M213.333,128.96c-35.55,0-64.482-28.924-64.482-64.482C148.851,28.924,177.783,0,213.333,0
+      c35.558,0,64.482,28.924,64.482,64.474C277.815,100.032,248.892,128.96,213.333,128.96z M213.333,46.643
+      c-9.835,0-17.835,8-17.835,17.835s8,17.835,17.835,17.835c9.835,0,17.835-8,17.835-17.835S223.168,46.643,213.333,46.643z"/>
+    <polygon fill="#d9743a" points="34.334,266.15 76.143,193.732 117.952,266.15"/>
+    <polygon fill="#d9743a" points="308.715,266.15 350.524,193.732 392.333,266.15"/>
+  </g>
 </svg>`.trim();
 
 const VAN_ICON_SVG = `
-<svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M2 14.5V9.5C2 8.7 2.7 8 3.5 8H13l5 3.5V14.5H2Z" fill="#2f9e6e" stroke="#fff" stroke-width="1"/>
   <rect x="2" y="8" width="16" height="6.5" fill="#2f9e6e" stroke="#fff" stroke-width="1"/>
   <rect x="13.2" y="9.7" width="4.3" height="3.2" fill="#cdeee0" stroke="#2f9e6e" stroke-width="0.6"/>
@@ -206,8 +212,8 @@ function buildMap({ stopovers, logs }) {
       icon: L.divIcon({
         className: "",
         html: `<div class="current-location-marker"><div class="pulse-ring"></div><div class="pulse-icon">${VAN_ICON_SVG}</div></div>`,
-        iconSize: [22, 22],
-        iconAnchor: [11, 11],
+        iconSize: [34, 34],
+        iconAnchor: [17, 17],
       }),
       zIndexOffset: 1000,
     }).addTo(map);
