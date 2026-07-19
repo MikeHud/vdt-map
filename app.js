@@ -119,12 +119,12 @@ function parseGpx(xml) {
   const wptNodes = Array.from(xml.querySelectorAll("wpt"));
   const stopovers = wptNodes.map((node) => {
     const name = text(node, "name");
-    const desc = text(node, "desc") || text(node, "cmt");
+    const note = text(node, "cmt") || text(node, "desc");
     return {
       lat: parseFloat(node.getAttribute("lat")),
       lon: parseFloat(node.getAttribute("lon")),
       name,
-      note: desc,
+      note,
       date: parseWaypointDate(name),
     };
   });
@@ -144,7 +144,7 @@ function parseGpx(xml) {
 
 function popupHtml(point, isCurrent) {
   const dateLabel = point.date ? formatDate(point.date) : point.name;
-  const note = point.note ? `<span class="popup-note">${escapeHtml(point.note)}</span>` : "";
+  const note = point.note ? `<span class="popup-note">${renderNote(point.note)}</span>` : "";
   const currentTag = isCurrent ? '<span class="popup-current">Current location</span>' : "";
   return `<span class="popup-date">${escapeHtml(dateLabel)}</span>${note}${currentTag}`;
 }
@@ -153,6 +153,38 @@ function escapeHtml(str) {
   const div = document.createElement("div");
   div.textContent = str;
   return div.innerHTML;
+}
+
+const URL_RE = /https?:\/\/[^\s<]+/g;
+
+// Escapes note text while turning any bare http(s) URL into a clickable
+// link, so notes/waypoint descriptions can just contain a plain URL.
+function linkifyText(str) {
+  let html = "";
+  let lastIndex = 0;
+  for (const match of str.matchAll(URL_RE)) {
+    html += escapeHtml(str.slice(lastIndex, match.index));
+    const url = match[0];
+    html += `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(url)}</a>`;
+    lastIndex = match.index + url.length;
+  }
+  html += escapeHtml(str.slice(lastIndex));
+  return html;
+}
+
+// Waypoint notes may end with a blank line followed by "Country: blogUrl"
+// (written by scripts/enrich-countries.mjs). Render that as a "Country
+// posts" link on its own line rather than the raw URL.
+const NOTE_COUNTRY_RE = /\n\n([^\n:]+):\s*(https?:\/\/\S+)\s*$/;
+
+function renderNote(note) {
+  const match = NOTE_COUNTRY_RE.exec(note);
+  if (!match) return linkifyText(note);
+  const mainText = note.slice(0, match.index);
+  const country = match[1].trim();
+  const url = match[2];
+  const link = `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">See ${escapeHtml(country)} posts</a>`;
+  return `${linkifyText(mainText)}\n\n${link}`;
 }
 
 function bindMarkerInteractions(marker, point, isCurrent, hoverCapable) {

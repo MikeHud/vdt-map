@@ -36,6 +36,11 @@ html, body {
   white-space: pre-line;
 }
 
+.popup-note a {
+  color: #3a6ea5;
+  font-weight: 600;
+}
+
 .popup-current {
   display: inline-block;
   font-weight: 600;
