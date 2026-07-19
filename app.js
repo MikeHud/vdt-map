@@ -223,10 +223,7 @@ function renderList(listEl, entries, onSelect, currentEntry) {
     nameSpan.textContent = entry.name;
     li.appendChild(nameSpan);
     if (entry === currentEntry) {
-      const tag = document.createElement("span");
-      tag.className = "panel-current-tag";
-      tag.textContent = "CURRENT";
-      li.appendChild(tag);
+      li.classList.add("panel-current-entry");
     }
     li.addEventListener("click", () => onSelect(entry));
     entry.listItem = li;
