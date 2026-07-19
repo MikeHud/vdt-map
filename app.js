@@ -3,6 +3,20 @@ const ROUTE_COLOR = "#3a6ea5";
 
 const DATE_RE = /(\d{1,2})\/(\d{1,2})\/(\d{4})\s*$/;
 
+function setupPanelToggle() {
+  const panel = document.getElementById("panel");
+  const toggle = document.getElementById("panel-toggle");
+  const desktopQuery = window.matchMedia("(min-width: 768px)");
+
+  function setOpen(open) {
+    panel.classList.toggle("open", open);
+    toggle.setAttribute("aria-expanded", String(open));
+  }
+
+  setOpen(desktopQuery.matches);
+  toggle.addEventListener("click", () => setOpen(!panel.classList.contains("open")));
+}
+
 function parseWaypointDate(name) {
   const match = DATE_RE.exec(name || "");
   if (!match) return null;
@@ -154,3 +168,5 @@ fetch(GPX_FILE)
       "</p>";
     console.error(err);
   });
+
+setupPanelToggle();
