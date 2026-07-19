@@ -4,7 +4,7 @@
     <link href="http://www.garmin.com">
       <text>Garmin International</text>
     </link>
-    <time>2026-07-19T20:37:11Z</time>
+    <time>2026-07-19T20:39:29Z</time>
     <bounds maxlat="69.323365017771721" maxlon="28.647314021363854" minlat="29.522310364991426" minlon="-10.047033363953233"/>
   </metadata>
   <wpt lat="51.156585998833179" lon="1.393678989261389">
@@ -9103,10 +9103,10 @@ Netherlands: https://vandogtraveller.com/tag/netherlands</desc>
     <name>camp e4.2 8/11/2018</name>
     <cmt>Roadside overnight stop
 
-Belgium: https://vandogtraveller.com/tag/belgium</cmt>
+</cmt>
     <desc>Roadside overnight stop
 
-Belgium: https://vandogtraveller.com/tag/belgium</desc>
+</desc>
     <sym>Anchor</sym>
     <type>user</type>
     <extensions>
