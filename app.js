@@ -1,5 +1,6 @@
 const GPX_FILE = "track-main.GPX";
 const ROUTE_COLOR = "#3a6ea5";
+const HIGHLIGHT_COLOR = "#d9743a";
 
 const DATE_RE = /(\d{1,2})\/(\d{1,2})\/(\d{4})\s*$/;
 
@@ -157,10 +158,81 @@ function buildMap({ stopovers, logs }) {
   return { map, stopovers, logs, currentLocation };
 }
 
+function sortForPanel(entries) {
+  const withDate = entries.filter((e) => e.date).sort((a, b) => b.date - a.date);
+  const withoutDate = entries.filter((e) => !e.date);
+  return withDate.concat(withoutDate);
+}
+
+function renderList(listEl, entries, onSelect, currentEntry) {
+  entries.forEach((entry) => {
+    const li = document.createElement("li");
+    const nameSpan = document.createElement("span");
+    nameSpan.textContent = entry.name;
+    li.appendChild(nameSpan);
+    if (entry === currentEntry) {
+      const tag = document.createElement("span");
+      tag.className = "panel-current-tag";
+      tag.textContent = "CURRENT";
+      li.appendChild(tag);
+    }
+    li.addEventListener("click", () => onSelect(entry, li));
+    entry.listItem = li;
+    listEl.appendChild(li);
+  });
+}
+
+let selected = null;
+
+function clearSelection() {
+  if (!selected) return;
+  if (selected.kind === "log") {
+    if (selected.entry.layer) {
+      selected.entry.layer.setStyle({ color: ROUTE_COLOR, weight: 3 });
+    }
+  } else {
+    const el = selected.entry.marker.getElement();
+    if (el) el.classList.remove("panel-selected");
+  }
+  if (selected.entry.listItem) selected.entry.listItem.classList.remove("active");
+  selected = null;
+}
+
+function selectLog(entry, map) {
+  clearSelection();
+  if (entry.layer) {
+    entry.layer.setStyle({ color: HIGHLIGHT_COLOR, weight: 5 });
+    entry.layer.bringToFront();
+  }
+  if (entry.listItem) entry.listItem.classList.add("active");
+  selected = { kind: "log", entry };
+  if (entry.coords.length) {
+    map.fitBounds(L.latLngBounds(entry.coords), { padding: [20, 20] });
+  }
+}
+
+function selectCamp(entry, map) {
+  clearSelection();
+  const el = entry.marker.getElement();
+  if (el) el.classList.add("panel-selected");
+  if (entry.listItem) entry.listItem.classList.add("active");
+  selected = { kind: "camp", entry };
+  map.setView([entry.lat, entry.lon], Math.max(map.getZoom(), 12));
+  entry.marker.openPopup();
+}
+
+function buildPanel({ map, stopovers, logs, currentLocation }) {
+  const campsList = document.getElementById("camps-list");
+  const logsList = document.getElementById("logs-list");
+
+  renderList(campsList, sortForPanel(stopovers), (entry) => selectCamp(entry, map), currentLocation);
+  renderList(logsList, sortForPanel(logs), (entry) => selectLog(entry, map), null);
+}
+
 fetch(GPX_FILE)
   .then((res) => res.text())
   .then((str) => new DOMParser().parseFromString(str, "application/xml"))
-  .then((xml) => buildMap(parseGpx(xml)))
+  .then((xml) => buildPanel(buildMap(parseGpx(xml))))
   .catch((err) => {
     document.getElementById("map").innerHTML =
       '<p style="padding:2rem;font-family:sans-serif;">Could not load map data: ' +
