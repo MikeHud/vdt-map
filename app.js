@@ -189,15 +189,41 @@ function renderNote(note) {
 
 function bindMarkerInteractions(marker, point, isCurrent, hoverCapable) {
   marker.bindPopup(popupHtml(point, isCurrent));
-  if (hoverCapable) {
-    // Leaflet's default click handler toggles the popup, which fights with
-    // hover-to-open on desktop (click right after hover would close it).
-    // Rebind click to always open instead of toggling.
-    marker.off("click");
-    marker.on("click", () => marker.openPopup());
-    marker.on("mouseover", () => marker.openPopup());
-    marker.on("mouseout", () => marker.closePopup());
-  }
+  if (!hoverCapable) return;
+
+  // Leaflet's default click handler toggles the popup, which fights with
+  // hover-to-open on desktop (click right after hover would close it).
+  // Rebind click to always open instead of toggling.
+  marker.off("click");
+  marker.on("click", () => marker.openPopup());
+
+  // Closing on mouseout must be delayed and cancellable: the popup element
+  // isn't a DOM child of the marker, so moving the cursor off the marker
+  // and onto the popup (e.g. to click a link) fires mouseout before the
+  // pointer arrives over the popup. Without the delay the popup closes
+  // out from under the cursor and the link can never be clicked.
+  let closeTimer = null;
+  const cancelClose = () => {
+    if (closeTimer) {
+      clearTimeout(closeTimer);
+      closeTimer = null;
+    }
+  };
+  const scheduleClose = () => {
+    cancelClose();
+    closeTimer = setTimeout(() => marker.closePopup(), 200);
+  };
+
+  marker.on("mouseover", () => {
+    cancelClose();
+    marker.openPopup();
+  });
+  marker.on("mouseout", scheduleClose);
+  marker.on("popupopen", (e) => {
+    const el = e.popup.getElement();
+    el.addEventListener("mouseover", cancelClose);
+    el.addEventListener("mouseout", scheduleClose);
+  });
 }
 
 function buildMap({ stopovers, logs }) {
