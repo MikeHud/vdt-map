@@ -46,14 +46,22 @@ html, body {
   margin-top: 6px;
 }
 
-/* Stopover dot marker */
-.stopover-dot {
-  width: 10px;
-  height: 10px;
+/* Stopover icon marker */
+.stopover-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.stopover-icon::before {
+  content: "";
+  position: absolute;
+  inset: 0;
   border-radius: 50%;
-  background: #d9743a;
-  border: 1.5px solid #fff;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+  background: transparent;
 }
 
 /* Current location marker */
@@ -75,17 +83,24 @@ html, body {
   animation: pulse 1.8s ease-out infinite;
 }
 
-.current-location-marker .pulse-dot {
+.current-location-marker .pulse-icon {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 14px;
-  height: 14px;
-  margin: -7px 0 0 -7px;
+  width: 22px;
+  height: 22px;
+  margin: -11px 0 0 -11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.current-location-marker .pulse-icon::before {
+  content: "";
+  position: absolute;
+  inset: 0;
   border-radius: 50%;
-  background: #2f9e6e;
-  border: 2px solid #fff;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
+  background: transparent;
 }
 
 @keyframes pulse {
@@ -201,10 +216,12 @@ html, body {
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
 }
 
-.panel-selected .stopover-dot {
-  box-shadow: 0 0 0 3px rgba(217, 116, 58, 0.55), 0 0 0 1px rgba(0, 0, 0, 0.25);
+.panel-selected .stopover-icon::before {
+  background: rgba(217, 116, 58, 0.35);
+  box-shadow: 0 0 0 2px rgba(217, 116, 58, 0.55);
 }
 
-.panel-selected .current-location-marker .pulse-dot {
-  box-shadow: 0 0 0 3px rgba(217, 116, 58, 0.55), 0 0 0 1px rgba(0, 0, 0, 0.3);
+.panel-selected .current-location-marker .pulse-icon::before {
+  background: rgba(217, 116, 58, 0.35);
+  box-shadow: 0 0 0 2px rgba(217, 116, 58, 0.55);
 }
