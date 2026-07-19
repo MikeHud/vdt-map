@@ -144,13 +144,14 @@ function bindMarkerInteractions(marker, point, isCurrent, hoverCapable) {
 }
 
 function buildMap({ stopovers, logs }) {
-  const map = L.map("map", { zoomControl: true, zoomSnap: 0.25 });
+  const map = L.map("map", { zoomControl: true });
 
   L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
     attribution:
       '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
     subdomains: "abcd",
     maxZoom: 19,
+    detectRetina: true,
   }).addTo(map);
 
   logs.forEach((log) => {
