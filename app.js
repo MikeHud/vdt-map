@@ -226,54 +226,14 @@ function bindMarkerInteractions(marker, point, isCurrent, hoverCapable) {
   });
 }
 
-const COUNTRIES_FILE = "countries.geojson";
-
-// Deterministic pastel fill/border per country so shading is stable across reloads.
-function countryColors(key) {
-  let hash = 0;
-  for (let i = 0; i < key.length; i++) {
-    hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
-  }
-  const hue = hash % 360;
-  return {
-    fill: `hsl(${hue}, 40%, 90%)`,
-    border: `hsl(${hue}, 30%, 78%)`,
-  };
-}
-
-function addCountryLayer(map) {
-  fetch(COUNTRIES_FILE)
-    .then((res) => res.json())
-    .then((geojson) => {
-      const layer = L.geoJSON(geojson, {
-        style: (feature) => {
-          const colors = countryColors(feature.properties.iso_a3 || feature.properties.name || "");
-          return {
-            fillColor: colors.fill,
-            fillOpacity: 0.35,
-            color: colors.border,
-            weight: 1,
-            interactive: false,
-          };
-        },
-      }).addTo(map);
-      layer.bringToBack();
-    })
-    .catch(() => {});
-}
-
 function buildMap({ stopovers, logs }) {
   const map = L.map("map", { zoomControl: true });
 
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    subdomains: "abcd",
+      '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors',
     maxZoom: 19,
-    detectRetina: true,
   }).addTo(map);
-
-  addCountryLayer(map);
 
   logs.forEach((log) => {
     if (log.coords.length > 1) {
